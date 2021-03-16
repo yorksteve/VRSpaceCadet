@@ -12,7 +12,7 @@ namespace Scripts.Interactables
         [SerializeField] private GameObject _flightController;
         [SerializeField] private float _rotationStrength = 50f;
         [SerializeField] private float _torque = 5f;
-        [SerializeField] private float _rotateSpeed = .9f;
+        [SerializeField] private float _rotateSpeed = .5f;
 
         OVRInput.Controller _controller;
         OVRGrabber _grabber;
@@ -115,7 +115,7 @@ namespace Scripts.Interactables
         {
             _flightController.transform.Rotate(movement * _torque);
 
-            _ship.transform.rotation = Quaternion.Lerp(_ship.transform.rotation, _flightController.transform.rotation, Time.deltaTime * _rotateSpeed);
+            _ship.transform.rotation = Quaternion.Lerp(_ship.transform.rotation, _flightController.transform.rotation, _rotateSpeed);
         }
 
         private void GrabEnd()

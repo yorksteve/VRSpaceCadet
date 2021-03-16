@@ -35,6 +35,7 @@ namespace Scripts.Managers
         [SerializeField] private CinemachineSmoothPath _dollyTrack2;
         [SerializeField] private CinemachineSmoothPath _dollyTrack3;
         [SerializeField] private Light _shipLight;
+        [SerializeField] private float _shipSpeed = 7f;
 
         [SerializeField] private GameObject _astroidParticleSystem;
 
@@ -51,6 +52,7 @@ namespace Scripts.Managers
 
         private Renderer _coreRend;
         private Color[] _colorArray = { Color.red, Color.white };
+        private Color[] _reactorColorArray = { Color.white, Color.black };
 
         private CinemachineDollyCart _shipPath;
         private Rigidbody _shipRB;
@@ -101,13 +103,14 @@ namespace Scripts.Managers
         {
             onFade?.Invoke();
             _shipPath = _playerShip.GetComponent<CinemachineDollyCart>();
+            _shipPath.m_Path = null;
             _playerShip.transform.position = _startPos.position;
             _playerShip.transform.rotation = _startPos.rotation;
             _astroidBelt.SetActive(false);
             _shipRB = _playerShip.GetComponent<Rigidbody>();
             _coreRend = _core.GetComponent<Renderer>();
             _astroidScene = false;
-            StartCoroutine(StartYield());
+            //StartCoroutine(StartYield());
         }
 
         IEnumerator StartYield()
@@ -181,6 +184,11 @@ namespace Scripts.Managers
             if (id.Equals(1))
             {
                 Bootup();
+            }
+
+            if (id.Equals(15))
+            {
+                ChangeGameScene(GameScene.FreeFlight);
             }
         }
 
@@ -265,7 +273,6 @@ namespace Scripts.Managers
                 _shipPath.m_Path = _dollyTrack3;
                 _shipPath.m_Position = 0;
                 _shipPath.m_Speed = 0;
-                onEndFinalWarp?.Invoke();
             }
         }
 
@@ -283,9 +290,7 @@ namespace Scripts.Managers
             }
             else
             {
-
-                onSendVO?.Invoke(15);
-                ChangeGameScene(GameScene.FreeFlight);
+                onEndFinalWarp?.Invoke();
             }
         }
 
@@ -293,7 +298,7 @@ namespace Scripts.Managers
         {
             onAstroidScene?.Invoke();
             StartCoroutine(AstroidWarningLightRoutine());
-            _shipPath.m_Speed = 5;
+            _shipPath.m_Speed = _shipSpeed;
             _redScreen.SetActive(true);
             _normalScreen.SetActive(false);
         }
@@ -361,6 +366,12 @@ namespace Scripts.Managers
             _chair.transform.Rotate(0f, 180f, 0f);
         }
 
+        public void FinalWarpComplete()
+        {
+            onSendVO?.Invoke(15);
+            _shipPath.m_Path = null;
+        }
+
         public void FreeFlight()
         {
             _shipRB.isKinematic = false;
@@ -400,18 +411,21 @@ namespace Scripts.Managers
             while (_astroidScene == true)
             {
                 //_astroidParticleSystem.transform.position.x = _playerShip.transform.position.x;
+                _astroidParticleSystem.transform.position = new Vector3(_playerShip.transform.position.x - 100, _astroidParticleSystem.transform.position.y, _astroidParticleSystem.transform.position.z);
                 yield return null;
             }
         }
 
         IEnumerator CoreFlickerRoutine()
         {
-            int i = 5;
+            int i = 2;
+            int j = 0;
             while (i > 0)
             {
-                _coreRend.materials[0].SetColor("_EmissionColor", Color.white);
+                _coreRend.materials[0].SetColor("_EmissionColor", _reactorColorArray[j % 2]);
+                j++;
                 yield return new WaitForSeconds(Random.Range(0f, .5f));
-                _coreRend.materials[0].SetColor("_EmissionColor", Color.black);
+                //_coreRend.materials[0].SetColor("_EmissionColor", Color.black);
                 i--;
             }
             _coreRend.materials[0].SetColor("_EmissionColor", Color.white);

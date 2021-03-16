@@ -15,6 +15,7 @@ namespace Scripts.Interactables
         OVRInput.Controller _controller;
         OVRGrabber _grabber;
 
+        private Vector3 _grabOrigin;
         private Vector3 _controllerPos;
         private Vector3 _movement;
         private Renderer _handRend;
@@ -88,6 +89,7 @@ namespace Scripts.Interactables
         private void GrabBegin()
         {
             _isGrabbed = true;
+            _grabOrigin = _grabber.transform.position;
             _handRend = _grabber.GetComponentInChildren<Renderer>();
             _handRend.enabled = false;
         }
@@ -96,13 +98,13 @@ namespace Scripts.Interactables
         {
             _controllerPos = _grabber.transform.position;
 
-            var movement = _controllerPos;
-            _movement.x = movement.z;
+            var movement = _grabOrigin - _controllerPos;
+            _movement.x = -movement.z;
             _movement.y = 0;
             _movement.z = 0;
 
             transform.rotation = Quaternion.Euler(_movement * _rotationStrength);
-            Mathf.Clamp(-40f, 40f, transform.rotation.x);
+            Mathf.Clamp(transform.rotation.x, - 40f, 40f);
 
             _velocity = transform.rotation.x + 40f;
             EnginePower(_velocity);

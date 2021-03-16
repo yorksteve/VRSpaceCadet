@@ -12,6 +12,7 @@ namespace Scripts.Interactables
         [SerializeField] private bool _broken;
 
         private Renderer _rend;
+        private Color[] _colorArray = { Color.red, Color.white };
         private bool _coreBroken;
 
         public static Action onBrokenCoreRemoved;
@@ -66,11 +67,13 @@ namespace Scripts.Interactables
 
         IEnumerator FlickerRoutine()
         {
+            int i = 0;
             while (_coreBroken == true)
             {
-                _rend.materials[0].SetColor("_EmissionColor", Color.red);
+                _rend.materials[0].SetColor("_EmissionColor", _colorArray[i % 2]);
+                i++;
                 yield return new WaitForSeconds(Random.Range(0f, .5f));
-                _rend.materials[0].SetColor("_EmissionColor", Color.white);
+                //_rend.materials[0].SetColor("_EmissionColor", Color.white);
             }
             yield return null;
         }
